@@ -2,9 +2,11 @@ import datetime
 import json
 import threading
 from time import sleep
-
+import platform
 import psutil
 import requests
+from Model.Screenshot import *
+import boto3
 
 from Model.Event import ProcessEvent
 
@@ -19,27 +21,24 @@ class ProcessMonitor(threading.Thread):
         self.black_list_process = []
 
     def run(self):
+        s3 = boto3.resource('s3')
+        bucket = s3.Bucket('mybucket')
+        obj = bucket.Object(self.api)
+        conditions = [
+            {"acl": "private"},
+            ["content-length-range", 10, 100]
+        ]
         while True:
-            running_process = []
-            for proc in psutil.process_iter(attrs=['pid', 'name']):
-                if proc.info['name'] in self.black_list_process:
-                    print("killed ", proc.info)
-                    proc.kill()
-                    ps = ProcessEvent(proc, datetime.datetime.now(), True)
-                else:
-                    ps = ProcessEvent(proc, datetime.datetime.now(), False)
-                running_process.append(ps.event)
             try:
-                data = json.dumps(running_process).encode('utf8')
-
-                response = requests.post("https://" + self.api + "/process", data=data,
-                                         headers={"x-api-key": self.key})
-                if response.ok:
-                    self.black_list_process = list(map(lambda x: x.strip(), response.json().split(",")))
+                if (platform.system() == 'Windows'):
+                    file=Screenshot.window(time.strftime("%Y%m%d-%H%M%S"))
                 else:
-                    print(response.status_code)
-                    print(response.reason)
+                    file=Screenshot.linux(time.strftime("%Y%m%d-%H%M%S"))
+
+
+                with open(file, 'rb') as data:
+                    obj.upload_fileobj(data,bucket,obj,conditions)
             except Exception as e:
                 print(e)
-            sleep(5)
 
+            sleep(5)
