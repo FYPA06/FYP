@@ -1,7 +1,6 @@
 import threading
 import pyautogui
 import requests
-import os
 
 from time import sleep
 
