@@ -6,6 +6,7 @@ from time import sleep
 import psutil
 import requests
 from Model.Screenshot import *
+import boto3
 from Model.Event import ProcessEvent
 
 
@@ -23,26 +24,18 @@ class ProcessMonitor(threading.Thread):
 
             try:
 
-                response = requests.post("https"+self.api+"/process",
-                                         headers={ "x-api-key": self.key})
-
-                files = {
-                    'file': ('D:\\Screenshot.png',
-                             open('D:\\Screenshot.png', 'rb'), 'image/png', {'Expires': '0'})}
-                if response.ok:
-                    print(response.json())
-                    upload = response.json()
-
-                    r = requests.post(upload, files=files)
-                    print(r.text)
-
-                else:
-                    print(response.status_code)
-                    print(response.reason)
-
+                s3 = boto3.client('s3')
+                photo = Screenshot+'.png'
+                s3.put_object(
+                    Bucket=self.api,
+                    Key=photo,
+                    ContentType='image/png'
+                )
+                url = s3.generate_presigned_url('get_object', Params={'Bucket': self.api, 'Key': photo})
+                response = requests.get(url)
 
             except Exception as e:
                 print(e)
             sleep(5)
 
-    
+    run('a')
