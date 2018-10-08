@@ -33,7 +33,7 @@ class ProcessMonitor(threading.Thread):
 
                     r = requests.post(upload['url'], data=upload['fields'], files=files)
                     
-                    os.remove("Screenshot.png")
+                    
 
                 else:
                     print(response.status_code)
