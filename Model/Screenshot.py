@@ -24,7 +24,7 @@ class Screenshot(threading.Thread):
                 # Save the image
                 file_name = 'Screenshot.jpg'
                 pic.save(file_name)
-                files = {'file': (file_name, open(file_name, 'rb'), 'image/png', {'Expires': '0'})}
+                files = {'file': (file_name, open(file_name, 'rb'), 'image/jpg', {'Expires': '0'})}
                 
                 if response.ok:
                     print('screenshot url got !')
