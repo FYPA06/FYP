@@ -55,10 +55,8 @@ class Handler(FileSystemEventHandler):
             else:
                 print(response.status_code)
                 print(response.reason)
-
         except Exception as e:
             print(e)
-
 
     @staticmethod
     def sha256_checksum(filename, block_size=65536):

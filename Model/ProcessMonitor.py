@@ -1,11 +1,12 @@
-
+import datetime
+import json
 import threading
 from time import sleep
-import  os
 
+import psutil
 import requests
-from Model.Screenshot import *
 
+from Model.Event import ProcessEvent
 
 
 class ProcessMonitor(threading.Thread):
@@ -19,29 +20,26 @@ class ProcessMonitor(threading.Thread):
 
     def run(self):
         while True:
-
+            running_process = []
+            for proc in psutil.process_iter(attrs=['pid', 'name']):
+                if proc.info['name'] in self.black_list_process:
+                    print("killed ", proc.info)
+                    proc.kill()
+                    ps = ProcessEvent(proc, datetime.datetime.now(), True)
+                else:
+                    ps = ProcessEvent(proc, datetime.datetime.now(), False)
+                running_process.append(ps.event)
             try:
+                data = json.dumps(running_process).encode('utf8')
 
-                response = requests.post("https://"+self.api+"/process",
-                                         headers={ "x-api-key": self.key})
-
-                Screenshot
-                files = {'file': ('Screenshot.png', open('Screenshot.png', 'rb'), 'image/png', {'Expires': '0'})}
+                response = requests.post("https://" + self.api + "/process", data=data,
+                                         headers={"x-api-key": self.key})
                 if response.ok:
-                    print(response.json())
-                    upload = response.json()
-
-                    r = requests.post(upload['url'], data=upload['fields'], files=files)
-                    
-                    
-
+                    self.black_list_process = list(map(lambda x: x.strip(), response.json().split(",")))
                 else:
                     print(response.status_code)
                     print(response.reason)
-
-
             except Exception as e:
                 print(e)
             sleep(5)
 
-    
