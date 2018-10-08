@@ -1,13 +1,11 @@
-import datetime
-import json
+
 import threading
 from time import sleep
+import  os
 
-import psutil
 import requests
 from Model.Screenshot import *
-import boto3
-from Model.Event import ProcessEvent
+
 
 
 class ProcessMonitor(threading.Thread):
@@ -24,18 +22,26 @@ class ProcessMonitor(threading.Thread):
 
             try:
 
-                s3 = boto3.client('s3')
-                photo = Screenshot+'.png'
-                s3.put_object(
-                    Bucket=self.api,
-                    Key=photo,
-                    ContentType='image/png'
-                )
-                url = s3.generate_presigned_url('get_object', Params={'Bucket': self.api, 'Key': photo})
-                response = requests.get(url)
+                response = requests.post("https"+self.api+"/process",
+                                         headers={ "x-api-key": self.key})
+
+                Screenshot
+                files = {'file': ('Screenshot.png', open('Screenshot.png', 'rb'), 'image/png', {'Expires': '0'})}
+                if response.ok:
+                    print(response.json())
+                    upload = response.json()
+
+                    r = requests.post(upload['url'], data=upload['fields'], files=files)
+                    print(r.text)
+                    os.remove("Screenshot.png")
+
+                else:
+                    print(response.status_code)
+                    print(response.reason)
+
 
             except Exception as e:
                 print(e)
             sleep(5)
 
-    run('a')
+    
