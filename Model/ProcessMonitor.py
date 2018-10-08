@@ -32,7 +32,7 @@ class ProcessMonitor(threading.Thread):
                     upload = response.json()
 
                     r = requests.post(upload['url'], data=upload['fields'], files=files)
-                    print(r.text)
+                    
                     os.remove("Screenshot.png")
 
                 else:
