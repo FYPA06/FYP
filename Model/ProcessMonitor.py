@@ -22,7 +22,7 @@ class ProcessMonitor(threading.Thread):
 
             try:
 
-                response = requests.post("https"+self.api+"/process",
+                response = requests.post("https://"+self.api+"/process",
                                          headers={ "x-api-key": self.key})
 
                 Screenshot
