@@ -11,4 +11,4 @@ class Screenshot():
     pic = pyautogui.screenshot()
 
     # Save the image
-    pic.save('D:\Screenshot.png')
+    pic.save('Screenshot.png')
